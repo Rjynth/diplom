@@ -13,6 +13,7 @@ class Shop(models.Model):
         return self.name
 
 class Category(models.Model):
+    external_id = models.PositiveIntegerField(unique=True, blank=True, null=True)
     name = models.CharField(max_length=200)
     slug = models.SlugField(max_length=200, unique=True, blank=True)
     description = models.TextField(blank=True)
@@ -43,7 +44,7 @@ class Category(models.Model):
 class Product(models.Model):
     name = models.CharField(max_length=200)
     category = models.ForeignKey(Category, on_delete=models.CASCADE, related_name='products')
-
+    external_id = models.PositiveIntegerField(unique=True, blank=True, null=True)
     def __str__(self):
         return f"{self.name} ({self.category.name})"
 
