@@ -43,6 +43,7 @@ class Category(models.Model):
 
 class Product(models.Model):
     name = models.CharField(max_length=200)
+    description = models.TextField(blank=True)
     category = models.ForeignKey(Category, on_delete=models.CASCADE, related_name='products')
     external_id = models.PositiveIntegerField(unique=True, blank=True, null=True)
     def __str__(self):

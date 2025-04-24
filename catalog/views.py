@@ -1,4 +1,4 @@
-from rest_framework import viewsets
+from rest_framework import viewsets, generics
 from .models import Shop, Category, Product, ProductInfo, Parameter, ProductParameter
 from .serializers import (
     ShopSerializer,
@@ -8,7 +8,9 @@ from .serializers import (
     ParameterSerializer,
     ProductParameterSerializer
 )
-
+from rest_framework import generics, permissions
+from .models import ProductInfo
+from .serializers import ProductItemSerializer
 
 class ShopViewSet(viewsets.ModelViewSet):
     """API endpoint for managing shops."""
@@ -44,3 +46,16 @@ class ProductParameterViewSet(viewsets.ModelViewSet):
     """API endpoint for managing product parameters."""
     queryset = ProductParameter.objects.select_related('product_info', 'parameter').all()
     serializer_class = ProductParameterSerializer
+
+
+class ProductListAPIView(generics.ListAPIView):
+    queryset = ProductInfo.objects.select_related('product','shop')\
+            .prefetch_related('productparameter_set__parameter')
+    serializer_class = ProductItemSerializer
+    permission_classes = [permissions.AllowAny]
+
+class ProductDetailAPIView(generics.RetrieveAPIView):
+    queryset = ProductInfo.objects.select_related('product','shop')\
+            .prefetch_related('productparameter_set__parameter')
+    serializer_class = ProductItemSerializer
+    permission_classes = [permissions.AllowAny]

@@ -6,7 +6,9 @@ from .views import (
     ProductViewSet,
     ProductInfoViewSet,
     ParameterViewSet,
-    ProductParameterViewSet
+    ProductParameterViewSet,
+    ProductListAPIView,
+    ProductDetailAPIView
 )
 
 router = DefaultRouter()
@@ -18,5 +20,8 @@ router.register(r'parameters', ParameterViewSet)
 router.register(r'product-parameters', ProductParameterViewSet)
 
 urlpatterns = [
+    path('products/', ProductListAPIView.as_view(), name='product-list'),
+    path('products/<int:pk>/', ProductDetailAPIView.as_view(), name='product-detail'),
     path('api/', include(router.urls)),
+    path('products/<int:pk>/', ProductDetailAPIView.as_view(), name='product-detail'),
 ]

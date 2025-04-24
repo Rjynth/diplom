@@ -102,3 +102,34 @@ class ProductParameterSerializer(serializers.ModelSerializer):
             'parameter',    'parameter_id',
             'value'
         ]
+
+
+class ProductItemSerializer(serializers.ModelSerializer):
+    external_id     = serializers.IntegerField(source='product.external_id', read_only=True)
+    name            = serializers.CharField(source='product.name',        read_only=True)
+    description     = serializers.CharField(source='product.description', read_only=True, default='')
+    supplier        = ShopSerializer(source='shop',                        read_only=True)
+    characteristics = serializers.SerializerMethodField()
+    price           = serializers.DecimalField(max_digits=10, decimal_places=2, read_only=True)
+    price_rrc       = serializers.DecimalField(max_digits=10, decimal_places=2, read_only=True)
+    quantity        = serializers.IntegerField(read_only=True)
+
+    class Meta:
+        model  = ProductInfo
+        fields = [
+            'id',
+            'external_id',
+            'name',
+            'description',
+            'supplier',
+            'characteristics',
+            'price',
+            'price_rrc',
+            'quantity',
+        ]
+
+    def get_characteristics(self, obj):
+        return {
+            pp.parameter.name: pp.value
+            for pp in obj.productparameter_set.all()
+        }

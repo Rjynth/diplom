@@ -122,3 +122,18 @@ class Contact(models.Model):
             return f'{self.user}: {self.value}'
         addr = ', '.join(f'{k}={v}' for k, v in self.address.items())
         return f'{self.user}: {addr}'
+
+
+class Cart(models.Model):
+    user       = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='carts')
+    created_dt = models.DateTimeField(auto_now_add=True)
+    updated_dt = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        unique_together = ('cart', 'product_info')
+
+
+class CartItem(models.Model):
+    cart         = models.ForeignKey(Cart, on_delete=models.CASCADE, related_name='items')
+    product_info = models.ForeignKey(ProductInfo, on_delete=models.PROTECT)
+    quantity     = models.PositiveIntegerField()
