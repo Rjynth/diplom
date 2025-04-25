@@ -42,6 +42,17 @@ EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 ```
 
 
+## Docker
+
+В корне проекта лежит `Dockerfile` и `docker-compose.yml`.  
+Чтобы запустить приложение в контейнере:
+
+1. **Собрать образ и запустить контейнер**  
+   ```bash
+   docker-compose build
+   docker-compose up -d
+
+
 # Тестирование
 ### 1.  Запуск unit-тестов Django:
 
