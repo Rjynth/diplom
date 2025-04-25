@@ -12,6 +12,12 @@ class Order(models.Model):
         on_delete=models.CASCADE,
         related_name='orders'
     )
+    contact = models.ForeignKey(
+        'orders.Contact',
+        on_delete=models.PROTECT,
+        related_name='orders',
+        verbose_name='Контакт доставки'
+    )
     dt = models.DateTimeField(auto_now_add=True)
     STATUS_NEW = 'NEW'
     STATUS_CONFIRMED = 'CONFIRMED'
@@ -32,6 +38,12 @@ class Order(models.Model):
         default=STATUS_NEW,
         verbose_name='Статус заказа',
     )
+    def __str__(self):
+        return f'Заказ #{self.pk} ({self.get_status_display()})'
+
+    @property
+    def total_sum(self):
+        return sum(item.price * item.quantity for item in self.items.all())
 
 
 class OrderItem(models.Model):
@@ -129,11 +141,13 @@ class Cart(models.Model):
     created_dt = models.DateTimeField(auto_now_add=True)
     updated_dt = models.DateTimeField(auto_now=True)
 
-    class Meta:
-        unique_together = ('cart', 'product_info')
+
 
 
 class CartItem(models.Model):
     cart         = models.ForeignKey(Cart, on_delete=models.CASCADE, related_name='items')
     product_info = models.ForeignKey(ProductInfo, on_delete=models.PROTECT)
     quantity     = models.PositiveIntegerField()
+
+    class Meta:
+        unique_together = ('cart', 'product_info')

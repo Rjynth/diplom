@@ -29,5 +29,7 @@ urlpatterns = [
     path('api/auth/register/', RegisterAPIView.as_view(), name='register'),
     path('api/auth/login/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
     path('api/auth/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
-
+    path('api/cart/', include('orders.cart_urls')),
+    path('api/contacts/', include('orders.contact_urls')),
+    path('api/orders/', include('orders.order_urls')),
 ]
