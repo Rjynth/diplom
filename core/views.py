@@ -1,3 +1,4 @@
+from django.core.mail import send_mail
 from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -23,7 +24,17 @@ class RegisterAPIView(APIView):
         token_serializer.is_valid(raise_exception=True)
         tokens = token_serializer.validated_data  # {'access': ..., 'refresh': ...}
 
-        # 3) Формируем ответ
+        # 3) Отправляем письмо-подтверждение регистрации
+        send_mail(
+            subject=f'Добро пожаловать, {user.get_full_name() or user.email}!',
+            message='Спасибо за регистрацию на нашем сервисе. Теперь вы можете добавлять товары в корзину и подтверждать заказы.',
+            from_email='no-reply@yourshop.com',
+            recipient_list=[user.email],
+            fail_silently=True,
+        )
+
+
+        # 4) Формируем ответ
         data = {
             'user': RegisterSerializer(user).data,
             **tokens

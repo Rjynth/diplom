@@ -140,7 +140,6 @@ class OrderListAPIView(generics.ListAPIView):
     """
     serializer_class   = OrderListSerializer
     permission_classes = [permissions.IsAuthenticated]
-
     def get_queryset(self):
         # отдаём только свои заказы, сортируя по дате — самые свежие первыми
         return Order.objects.filter(user=self.request.user).order_by('-dt')
