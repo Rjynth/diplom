@@ -20,8 +20,15 @@ from rest_framework_simplejwt.views import (
     TokenObtainPairView,
     TokenRefreshView,
 )
-
+from drf_spectacular.views import (
+    SpectacularAPIView, SpectacularSwaggerView
+)
 from core.views import RegisterAPIView
+from core.views import SocialLoginAPIView
+
+
+
+
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -32,4 +39,10 @@ urlpatterns = [
     path('api/cart/', include('orders.cart_urls')),
     path('api/contacts/', include('orders.contact_urls')),
     path('api/orders/', include('orders.order_urls')),
+    path('api/schema/', SpectacularAPIView.as_view(), name='schema'),
+    path('api/docs/', SpectacularSwaggerView.as_view(
+        url_name='schema'
+    ), name='swagger-ui'),
+    path('auth/social/', include('social_django.urls', namespace='social')),
+    path('api/auth/social/<str:backend>/', SocialLoginAPIView.as_view(), name='social-login'),
 ]

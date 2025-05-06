@@ -1,0 +1,41 @@
+name: coverage
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  coverage:
+    runs-on: ubuntu-latest
+
+    steps:
+      # 1) Клонируем репо
+      - uses: actions/checkout@v3
+
+      # 2) Устанавливаем Python
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+
+      # 3) Ставим зависимости
+      - name: Install dependencies
+        run: |
+          pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install pytest pytest-django pytest-cov coverage
+
+      # 4) Запускаем тесты и собираем coverage.xml
+      - name: Run tests & generate coverage.xml
+        run: |
+          coverage run --source='.' -m pytest
+          coverage xml -o coverage.xml
+
+      # 5) Публикуем отчёт и бейдж
+      - name: Publish coverage report to PR and create badge
+        uses: orgoro/coverage@v3.2
+        with:
+          coverageFile: coverage.xml       # куда мы только что сохранили отчёт
+          token: ${{ secrets.GITHUB_TOKEN }}  # стандартный токен Actions

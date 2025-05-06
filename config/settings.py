@@ -9,6 +9,7 @@ https://docs.djangoproject.com/en/5.2/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.2/ref/settings/
 """
+import sys
 from datetime import timedelta
 from pathlib import Path
 
@@ -42,6 +43,8 @@ INSTALLED_APPS = [
     'orders',
     'rest_framework',
     'rest_framework_simplejwt.token_blacklist',
+    'drf_spectacular',
+    'social_django',
 ]
 
 REST_FRAMEWORK = {
@@ -53,6 +56,13 @@ REST_FRAMEWORK = {
     'DEFAULT_PERMISSION_CLASSES': [
         'rest_framework.permissions.AllowAny',
     ],
+    'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
+    'DEFAULT_THROTTLE_RATES': {
+        'user': '5/minute',  # авторизованным — не более 5 запросов в минуту
+        'anon': '2/minute',  # анонимным — не более 2 запросов в минуту
+    },
+
+
 }
 
 
@@ -64,6 +74,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'social_django.middleware.SocialAuthExceptionMiddleware',
 ]
 
 ROOT_URLCONF = 'config.urls'
@@ -75,9 +86,12 @@ TEMPLATES = [
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
+                'django.template.context_processors.debug',
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
+                'social_django.context_processors.backends',
+                'social_django.context_processors.login_redirect',
             ],
         },
     },
@@ -143,3 +157,47 @@ SIMPLE_JWT = {
     # …
 }
 EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+
+
+CELERY_BROKER_URL       = 'redis://redis:6379/0'
+CELERY_RESULT_BACKEND   = 'redis://redis:6379/0'
+CELERY_ACCEPT_CONTENT   = ['json']
+CELERY_TASK_SERIALIZER  = 'json'
+CELERY_RESULT_SERIALIZER = 'json'
+CELERY_TIMEZONE         = 'Europe/Warsaw'
+
+
+if 'test' in sys.argv:
+    CELERY_TASK_ALWAYS_EAGER = True
+    CELERY_BROKER_URL = 'memory://'
+
+
+SPECTACULAR_SETTINGS = {
+    'TITLE': 'Backend API for Diplom Project',
+    'DESCRIPTION': 'Автогенерируемая документация OpenAPI 3 для сервиса заказов',
+    'VERSION': '1.0.0',
+    'SERVE_INCLUDE_SCHEMA': False,   # не включать raw-схему в Swagger UI
+    # по желанию: схемы OAuth2, JWT-полей и т.д.
+}
+
+
+AUTHENTICATION_BACKENDS = [
+    'social_core.backends.google.GoogleOAuth2',
+    'social_core.backends.github.GithubOAuth2',
+    'django.contrib.auth.backends.ModelBackend',
+]
+
+LOGIN_REDIRECT_URL = '/'
+LOGOUT_REDIRECT_URL = '/'
+
+# Ключи и секреты OAuth (лучше хранить в .env и подставлять через os.environ)
+SOCIAL_AUTH_GOOGLE_OAUTH2_KEY      = '<ваш-GOOGLE_CLIENT_ID>'
+SOCIAL_AUTH_GOOGLE_OAUTH2_SECRET   = '<ваш-GOOGLE_CLIENT_SECRET>'
+SOCIAL_AUTH_GITHUB_KEY             = '<ваш-GITHUB_CLIENT_ID>'
+SOCIAL_AUTH_GITHUB_SECRET          = '<ваш-GITHUB_CLIENT_SECRET>'
+
+# Дополнительные scope, если нужно
+SOCIAL_AUTH_GOOGLE_OAUTH2_SCOPE    = ['email', 'profile']
+SOCIAL_AUTH_GITHUB_SCOPE           = ['user:email']
+
+

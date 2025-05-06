@@ -1,5 +1,5 @@
 from django.shortcuts import render
-
+from core.tasks import send_order_confirmation_email
 from rest_framework import generics, permissions, status
 from rest_framework.views import APIView
 from rest_framework.response import Response
@@ -119,15 +119,13 @@ class OrderConfirmAPIView(APIView):
         items.delete()
 
         # 6) Отправляем email (синхронно)
-        subject = f'Ваш заказ #{order.pk} подтверждён'
-        message = (
-            f'Здравствуйте, {request.user.get_full_name() or request.user.email}!\n\n'
-            f'Ваш заказ #{order.pk} успешно создан.\n'
-            f'Сумма заказа: {order.total_sum:.2f}.\n'
-            f'Статус: {order.get_status_display()}.\n\n'
-            'Спасибо за покупку!'
+        send_order_confirmation_email.delay(
+            order.pk,
+            request.user.email,
+            request.user.get_full_name() or request.user.email,
+            order.total_sum,
+            order.get_status_display()
         )
-        send_mail(subject, message, 'no-reply@yourshop.com', [request.user.email])
 
         # 7) Возвращаем готовый заказ
         return Response(OrderSerializer(order).data, status=status.HTTP_201_CREATED)

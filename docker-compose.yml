@@ -1,4 +1,8 @@
 services:
+  redis:
+    image: redis:6-alpine
+    ports:
+        - "6379:6379"
   web:
     build: .
     command: python manage.py runserver 0.0.0.0:8000
@@ -6,3 +10,10 @@ services:
       - .:/app
     ports:
       - "8000:8000"
+  worker:
+    build: .
+    command: celery -A config worker --loglevel=info
+    volumes:
+      - .:/app
+    depends_on:
+      - redis

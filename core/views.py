@@ -3,11 +3,31 @@ from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework.permissions import AllowAny
-
+from core.tasks import send_registration_email
 from .serializers import RegisterSerializer
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
+from rest_framework_simplejwt.tokens import RefreshToken
+from social_django.utils import psa
+
+
 
 class RegisterAPIView(APIView):
+
+
+
+    """
+    POST /api/auth/register/
+
+    Регистрация нового пользователя. На входе:
+      - first_name: строка, имя пользователя
+      - last_name: строка, фамилия пользователя
+      - email: строка, email (должен быть уникальным)
+      - password: строка, пароль (минимум 8 символов)
+
+    Возвращает:
+      - user: созданный пользователь
+      - access, refresh: JWT-токены
+    """
     permission_classes = [AllowAny]
 
     def post(self, request):
@@ -25,12 +45,9 @@ class RegisterAPIView(APIView):
         tokens = token_serializer.validated_data  # {'access': ..., 'refresh': ...}
 
         # 3) Отправляем письмо-подтверждение регистрации
-        send_mail(
-            subject=f'Добро пожаловать, {user.get_full_name() or user.email}!',
-            message='Спасибо за регистрацию на нашем сервисе. Теперь вы можете добавлять товары в корзину и подтверждать заказы.',
-            from_email='no-reply@yourshop.com',
-            recipient_list=[user.email],
-            fail_silently=True,
+        send_registration_email.delay(
+            user.email,
+            user.get_full_name() or user.email
         )
 
 
@@ -40,3 +57,30 @@ class RegisterAPIView(APIView):
             **tokens
         }
         return Response(data, status=status.HTTP_201_CREATED)
+
+class SocialLoginAPIView(APIView):
+    """
+    POST /api/auth/social/<backend>/
+    Тело: { "access_token": "<токен соцсети>" }
+    Ответ: {"access": "...", "refresh": "..."}
+    """
+    permission_classes = []
+
+    @psa('social:complete')
+    def post(self, request, backend):
+        token = request.data.get('access_token')
+        if not token:
+            return Response({'error': 'access_token не указан'},
+                            status=status.HTTP_400_BAD_REQUEST)
+
+        # request.backend настроит PSA на нужный social backend
+        user = request.backend.do_auth(token)
+        if not user or not user.is_active:
+            return Response({'error': 'не удалось аутентифицировать'}, status=status.HTTP_400_BAD_REQUEST)
+
+        # Генерируем JWT
+        refresh = RefreshToken.for_user(user)
+        return Response({
+            'access':  str(refresh.access_token),
+            'refresh': str(refresh),
+        }, status=status.HTTP_200_OK)

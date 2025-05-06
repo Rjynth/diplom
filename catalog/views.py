@@ -11,7 +11,7 @@ from .serializers import (
 from rest_framework import generics, permissions
 from .models import ProductInfo
 from .serializers import ProductItemSerializer
-
+from rest_framework.throttling import UserRateThrottle, AnonRateThrottle
 class ShopViewSet(viewsets.ModelViewSet):
     """API endpoint for managing shops."""
     queryset = Shop.objects.all()
@@ -53,6 +53,8 @@ class ProductListAPIView(generics.ListAPIView):
             .prefetch_related('productparameter_set__parameter')
     serializer_class = ProductItemSerializer
     permission_classes = [permissions.AllowAny]
+    throttle_classes = [UserRateThrottle, AnonRateThrottle]
+
 
 class ProductDetailAPIView(generics.RetrieveAPIView):
     queryset = ProductInfo.objects.select_related('product','shop')\

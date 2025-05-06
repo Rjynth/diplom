@@ -63,10 +63,17 @@ python manage.py test
 postman_collection.json
 
 и установите в окружении переменную base_url = http://127.0.0.1:8000.
- #                                                                               
-#                                                                               
-#                                                                               
-#                                                                               
+#
+# Social Login
+
+- **POST** `/api/auth/social/<backend>/`  
+  Авторизация через социальную сеть.  
+  Параметры:
+  ```json
+  {
+    "access_token": "<токен, полученный у провайдера>"
+  }
+
 #                                                                               
 #                                                                               
 #                                                                               
@@ -117,3 +124,7 @@ superuser:
 
 1             //password
 
+
+
+
+![Coverage Status](https://github.com/hleyn/PythonProject/actions/workflows/coverage.yml/badge.svg)
