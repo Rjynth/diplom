@@ -36,6 +36,9 @@ ALLOWED_HOSTS = [
 
 # Application definition
 
+
+
+
 INSTALLED_APPS = [
     'baton',
     'baton.autodiscover',
@@ -55,6 +58,29 @@ INSTALLED_APPS = [
     'social_django',
     'easy_thumbnails',
 ]
+
+TESTING = (
+    'pytest' in sys.argv[0]    # когда вы запускаете `pytest ...`
+    or 'pytest' in ' '.join(sys.argv)  # подстраховка
+    or 'test' in sys.argv        # если кто-то вдруг доделает с `manage.py test`
+    or os.getenv('GITHUB_ACTIONS')    # в GitHub Actions всегда TRUE
+)
+
+if TESTING:
+    # полностью исключаем django-cachalot из INSTALLED_APPS
+    INSTALLED_APPS = [
+        app for app in INSTALLED_APPS
+        if app != 'cachalot'
+    ]
+    # вместо redis используем самый простой локальный кеш
+    CACHES = {
+        'default': {
+            'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
+            'LOCATION': 'pytest-only',
+        }
+    }
+    # на всякий случай явно выключаем Cachalot (хоть он уже удалён из INSTALLED_APPS)
+    CACHALOT_ENABLED = False
 
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
@@ -245,13 +271,3 @@ CACHES = {
         }
     }
 }
-if 'pytest' in sys.argv or 'test' in sys.argv:
-    # Django во время pytest подменит CACHES на этот локальный
-    CACHES = {
-        'default': {
-            'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
-            'LOCATION': 'unique-snowflake',
-        }
-    }
-    # и можно отключить Cachalot, чтобы он не пытался писать во внешний кеш
-    CACHALOT_ENABLED = False
