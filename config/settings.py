@@ -57,6 +57,11 @@ REST_FRAMEWORK = {
         'rest_framework.permissions.AllowAny',
     ],
     'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
+    'DEFAULT_THROTTLE_CLASSES': [
+        'rest_framework.throttling.UserRateThrottle',
+        'rest_framework.throttling.AnonRateThrottle',
+    ],
+
     'DEFAULT_THROTTLE_RATES': {
         'user': '5/minute',  # авторизованным — не более 5 запросов в минуту
         'anon': '2/minute',  # анонимным — не более 2 запросов в минуту
@@ -201,3 +206,6 @@ SOCIAL_AUTH_GOOGLE_OAUTH2_SCOPE    = ['email', 'profile']
 SOCIAL_AUTH_GITHUB_SCOPE           = ['user:email']
 
 
+CELERY_TASK_ALWAYS_EAGER = True
+CELERY_TASK_EAGER_PROPAGATES = True
+CELERY_TASK_IGNORE_RESULT = True

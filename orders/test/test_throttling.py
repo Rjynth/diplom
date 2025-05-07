@@ -2,11 +2,12 @@ from django.urls import reverse
 from rest_framework import status
 from rest_framework.test import APITestCase
 from django.contrib.auth import get_user_model
-
+from django.core.cache import cache
 User = get_user_model()
 
 class ThrottlingTests(APITestCase):
     def setUp(self):
+        cache.clear()
         # создаём пользователя и получаем JWT
         self.user = User.objects.create_user(
             username='throttle', email='t@example.com', password='pwd12345'
@@ -21,6 +22,7 @@ class ThrottlingTests(APITestCase):
         self.url = reverse('product-list')
 
     def test_user_rate_throttle(self):
+        cache.clear()
         # 5 запросов должны пройти
         for _ in range(5):
             resp = self.client.get(self.url)
@@ -33,6 +35,7 @@ class ThrottlingTests(APITestCase):
         self.assertIn('Request was throttled', resp.data['detail'])
 
     def test_anon_rate_throttle(self):
+        cache.clear()
         # сбрасываем авторизацию, чтобы действовали анонимные лимиты
         self.client.credentials()
         for _ in range(2):
