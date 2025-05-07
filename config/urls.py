@@ -31,6 +31,7 @@ from core.views import RegisterAPIView, LoginAPIView, RefreshAPIView, SocialLogi
 
 
 urlpatterns = [
+    path('baton/', include('baton.urls')),
     path('admin/', admin.site.urls),
     path('api/', include('catalog.urls')),
     path('api/auth/register/',

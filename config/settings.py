@@ -9,6 +9,7 @@ https://docs.djangoproject.com/en/5.2/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.2/ref/settings/
 """
+import os
 import sys
 from datetime import timedelta
 from pathlib import Path
@@ -26,12 +27,18 @@ SECRET_KEY = 'django-insecure-@^u($kpj*2ky2+c7ly&^=ii1%t^ikh-jb@%4r6cs#d_gtt!%+s
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = [
+    'localhost',
+    '127.0.0.1',
+    '0.0.0.0',
+]
 
 
 # Application definition
 
 INSTALLED_APPS = [
+    'baton',
+    'baton.autodiscover',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -41,10 +48,12 @@ INSTALLED_APPS = [
     'catalog',
     'core',
     'orders',
+    "cachalot",
     'rest_framework',
     'rest_framework_simplejwt.token_blacklist',
     'drf_spectacular',
     'social_django',
+    'easy_thumbnails',
 ]
 
 REST_FRAMEWORK = {
@@ -72,6 +81,11 @@ REST_FRAMEWORK = {
 CELERY_TASK_ALWAYS_EAGER = True
 CELERY_TASK_EAGER_PROPAGATES = True
 CELERY_TASK_IGNORE_RESULT = True
+
+
+
+
+
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -208,3 +222,26 @@ SOCIAL_AUTH_GOOGLE_OAUTH2_SCOPE    = ['email', 'profile']
 SOCIAL_AUTH_GITHUB_SCOPE           = ['user:email']
 
 
+MEDIA_URL = '/media/'
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+
+THUMBNAIL_ALIASES = {
+    # для всех моделей
+    '': {
+        # имя алиаса: параметры
+        'avatar': {'size': (100, 100), 'crop': True},
+        'product_small': {'size': (200, 200), 'crop': False},
+        'product_medium': {'size': (400, 400), 'crop': False},
+        'avatar_small': {'size': (50, 50), 'crop': True},
+        'avatar_medium': {'size': (200, 200), 'crop': True},
+    },
+}
+CACHES = {
+    "default": {
+        "BACKEND": "django_redis.cache.RedisCache",
+        "LOCATION": "redis://redis:6379/1",
+        "OPTIONS": {
+            "CLIENT_CLASS": "django_redis.client.DefaultClient",
+        }
+    }
+}

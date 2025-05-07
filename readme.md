@@ -74,6 +74,14 @@ postman_collection.json
     "access_token": "<токен, полученный у провайдера>"
   }
 
+
+# Документация OpenAPI (Swagger)
+### Автогенерация с помощью drf-spectacular:
+```
+Схема: GET /api/schema/
+
+Swagger UI: GET /api/docs/
+```
 #                                                                               
 #                                                                               
 #                                                                               

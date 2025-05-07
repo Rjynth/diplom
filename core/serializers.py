@@ -1,6 +1,9 @@
 from django.contrib.auth import get_user_model
 from rest_framework import serializers
 from rest_framework.validators import UniqueValidator
+from easy_thumbnails.files import get_thumbnailer
+
+from core.models import Profile
 
 User = get_user_model()
 
@@ -25,3 +28,17 @@ class RegisterSerializer(serializers.ModelSerializer):
         validated_data['username'] = email
 
         return User.objects.create_user(**validated_data)
+
+
+class ProfileSerializer(serializers.ModelSerializer):
+    avatar_small = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Profile
+        fields = ('avatar', 'avatar_small', 'default_contact')
+
+    def get_avatar_small(self, obj):
+        if not obj.avatar:
+            return None
+        thumb = get_thumbnailer(obj.avatar).get_thumbnail('avatar_small')
+        return thumb.url
