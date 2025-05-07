@@ -49,12 +49,12 @@ class ProductParameterViewSet(viewsets.ModelViewSet):
 
 
 class ProductListAPIView(generics.ListAPIView):
+    pagination_class = None
     queryset = ProductInfo.objects.select_related('product','shop')\
             .prefetch_related('productparameter_set__parameter')
     serializer_class = ProductItemSerializer
     permission_classes = [permissions.AllowAny]
     throttle_classes = [UserRateThrottle, AnonRateThrottle]
-    pagination_class = None
 
 class ProductDetailAPIView(generics.RetrieveAPIView):
     queryset = ProductInfo.objects.select_related('product','shop')\

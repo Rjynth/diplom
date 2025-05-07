@@ -33,12 +33,18 @@ from core.views import RegisterAPIView, LoginAPIView, RefreshAPIView, SocialLogi
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('api/', include('catalog.urls')),
-    path('api/auth/register/', RegisterAPIView.as_view(), name='register'),
-    path('api/auth/login/', LoginAPIView.as_view(), name='token_obtain_pair'),
+    path('api/auth/register/',
+         RegisterAPIView.as_view(),
+         name='register'),
+    path('api/auth/login/',
+         TokenObtainPairView.as_view(throttle_classes=[]),
+         name='token_obtain_pair'),
 
 #   path('api/auth/register/', RegisterAPIView.as_view(), name='register'),
 #  path('api/auth/login/', LoginAPIView.as_view(), name='token_obtain_pair'),
-    path('api/auth/refresh/', RefreshAPIView.as_view(), name='token_refresh'),
+    path('api/auth/refresh/',
+         TokenRefreshView.as_view(throttle_classes=[]),
+         name='token_refresh'),
     path('api/cart/', include('orders.cart_urls')),
     path('api/contacts/', include('orders.contact_urls')),
     path('api/orders/', include('orders.order_urls')),
@@ -48,6 +54,8 @@ urlpatterns = [
     ), name='swagger-ui'),
     path('auth/social/', include('social_django.urls', namespace='social')),
 #    path('api/auth/social/<str:backend>/', SocialLoginAPIView.as_view(), name='social-login'),
-    path('api/auth/social/<backend>/', SocialLoginAPIView.as_view(), name='social-login'),
+    path('api/auth/social/<str:backend>/',
+         SocialLoginAPIView.as_view(throttle_classes=[]),
+         name='social-login'),
 
 ]
