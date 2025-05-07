@@ -22,6 +22,7 @@ docopt==0.6.2
 drf-spectacular==0.28.0
 idna==3.10
 inflection==0.5.1
+iniconfig==2.1.0
 jsonschema==4.23.0
 jsonschema-specifications==2025.4.1
 kombu==5.5.3
@@ -29,10 +30,12 @@ oauthlib==3.2.2
 packaging==25.0
 pip-tools==7.4.1
 pipreqs==0.4.13
+pluggy==1.5.0
 prompt_toolkit==3.0.51
 pycparser==2.22
 PyJWT==2.9.0
 pyproject_hooks==1.2.0
+pytest==8.3.5
 python-dateutil==2.9.0.post0
 python3-openid==3.2.0
 pytz==2025.2

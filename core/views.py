@@ -8,6 +8,21 @@ from .serializers import RegisterSerializer
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 from rest_framework_simplejwt.tokens import RefreshToken
 from social_django.utils import psa
+from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
+
+
+class LoginAPIView(TokenObtainPairView):
+    """
+    POST /api/auth/login/
+    Тело: {"username": "...", "password": "..."}
+    Ответ: {"access": "...", "refresh": "..."}
+    """
+    permission_classes = [AllowAny]
+    throttle_classes = []
+
+
+
+
 
 
 
@@ -29,7 +44,7 @@ class RegisterAPIView(APIView):
       - access, refresh: JWT-токены
     """
     permission_classes = [AllowAny]
-
+    throttle_classes = []
     def post(self, request):
         # 1) Сериализуем и создаём пользователя
         serializer = RegisterSerializer(data=request.data)
