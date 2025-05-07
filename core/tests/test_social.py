@@ -1,8 +1,7 @@
-from django.urls import reverse
 from django.contrib.auth import get_user_model
+from django.urls import reverse
 from rest_framework.test import APITestCase, override_settings
 from rest_framework import status
-from social_core.backends.google import GoogleOAuth2
 from unittest.mock import patch
 
 @override_settings(
@@ -13,17 +12,32 @@ class SocialAuthTests(APITestCase):
     def test_google_social_login(self):
         # 1) Создаём пользователя, которого вернёт do_auth
         User = get_user_model()
-        user = User.objects.create_user(email='g@example.com', password='pwd12345')
+        user = User.objects.create_user(
+            username='guser',
+            email='g@example.com',
+            password='pwd12345'
+        )
 
-        # 2) Формируем URL и данные
-        url = reverse('social-login', kwargs={'backend': 'google-oauth2'})
-        data = {'access_token': 'fake-token'}
-
-        # 3) Мокаем do_auth у GoogleOAuth2, чтобы возвращался наш user
+        # 2) Мокаем do_auth у реального GoogleOAuth2-бэкенда
+        from social_core.backends.google import GoogleOAuth2
         with patch.object(GoogleOAuth2, 'do_auth', return_value=user):
-            resp = self.client.post(url, data, format='json')
+            url = reverse('social-login', args=['google-oauth2'])
+            resp = self.client.post(
+                url,
+                data={'access_token': 'fake-token'},
+                format='json'
+            )
+            # 3) Успешный ответ с JWT
+            self.assertEqual(resp.status_code, status.HTTP_200_OK)
+            self.assertIn('access', resp.data)
+            self.assertIn('refresh', resp.data)
 
-        # 4) Проверяем, что получили OK и оба токена
+        # 4) Повторный запрос — тот же результат
+        resp = self.client.post(
+            url,
+            data={'access_token': 'fake-token'},
+            format='json'
+        )
         self.assertEqual(resp.status_code, status.HTTP_200_OK)
-        self.assertIn('access',  resp.data)
+        self.assertIn('access', resp.data)
         self.assertIn('refresh', resp.data)

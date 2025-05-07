@@ -51,8 +51,8 @@ REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
         'rest_framework_simplejwt.authentication.JWTAuthentication',
     ),
-    'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
-    'PAGE_SIZE': 20,
+    'DEFAULT_PAGINATION_CLASS': None,
+    'PAGE_SIZE': None,
     'DEFAULT_PERMISSION_CLASSES': [
         'rest_framework.permissions.AllowAny',
     ],
@@ -69,7 +69,9 @@ REST_FRAMEWORK = {
 
 
 }
-
+CELERY_TASK_ALWAYS_EAGER = True
+CELERY_TASK_EAGER_PROPAGATES = True
+CELERY_TASK_IGNORE_RESULT = True
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -206,6 +208,3 @@ SOCIAL_AUTH_GOOGLE_OAUTH2_SCOPE    = ['email', 'profile']
 SOCIAL_AUTH_GITHUB_SCOPE           = ['user:email']
 
 
-CELERY_TASK_ALWAYS_EAGER = True
-CELERY_TASK_EAGER_PROPAGATES = True
-CELERY_TASK_IGNORE_RESULT = True

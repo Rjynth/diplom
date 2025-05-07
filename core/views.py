@@ -80,7 +80,7 @@ class SocialLoginAPIView(APIView):
     Ответ: {"access": "...", "refresh": "..."}
     """
     permission_classes = []
-
+    throttle_classes = []
     @psa('social:complete')
     def post(self, request, backend):
         token = request.data.get('access_token')
@@ -99,3 +99,6 @@ class SocialLoginAPIView(APIView):
             'access':  str(refresh.access_token),
             'refresh': str(refresh),
         }, status=status.HTTP_200_OK)
+
+class RefreshAPIView(TokenRefreshView):
+    throttle_classes = []
