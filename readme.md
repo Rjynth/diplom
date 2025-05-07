@@ -127,4 +127,4 @@ superuser:
 
 
 
-![Coverage Status](https://github.com/hleyn/PythonProject/actions/workflows/coverage.yml/badge.svg)
+[![coverage](https://github.com/Rjynth/diplom/actions/workflows/coverage.yml/badge.svg?branch=main)](https://github.com/Rjynth/diplom/actions/workflows/coverage.yml)
