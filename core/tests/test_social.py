@@ -8,19 +8,24 @@ from unittest.mock import patch
     SOCIAL_AUTH_GOOGLE_OAUTH2_SECRET='test',
 )
 class SocialAuthTests(APITestCase):
-    @patch('core.views.request')
+
     def test_google_social_login(self, mock_request):
         # Мокаем PSA-do_auth, чтобы не обращаться к реальному Google
         from django.contrib.auth import get_user_model
         User = get_user_model()
         user = User.objects.create_user(email='g@example.com', password='pwd12345')
 
-        class DummyBackend:
-            name = 'google-oauth2'
-            def do_auth(self, token, *args, **kwargs):
-                return user
+        # мокаем do_auth у реального бекенда
 
-        mock_request.backend = DummyBackend()
+        from social_core.backends.google import GoogleOAuth2
+        with patch.object(GoogleOAuth2, 'do_auth', return_value=user):
+            url = reverse('social-login', args=['google-oauth2'])
+            resp = self.client.post(url, data={'access_token': 'fake'}, format='json')
+            self.assertEqual(resp.status_code, status.HTTP_200_OK)
+
+
+
+
         url = reverse('social-login', args=['google-oauth2'])
         resp = self.client.post(url, data={'access_token': 'fake'}, format='json')
         self.assertEqual(resp.status_code, status.HTTP_200_OK)

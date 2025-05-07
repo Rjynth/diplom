@@ -54,7 +54,7 @@ class ProductListAPIView(generics.ListAPIView):
     serializer_class = ProductItemSerializer
     permission_classes = [permissions.AllowAny]
     throttle_classes = [UserRateThrottle, AnonRateThrottle]
-
+    pagination_class = None
 
 class ProductDetailAPIView(generics.RetrieveAPIView):
     queryset = ProductInfo.objects.select_related('product','shop')\
