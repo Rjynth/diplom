@@ -34,7 +34,7 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('api/', include('catalog.urls')),
     path('api/auth/register/', RegisterAPIView.as_view(), name='register'),
-    path('api/auth/login/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
+    path('api/auth/login/', LoginAPIView.as_view(), name='token_obtain_pair'),
 
 #   path('api/auth/register/', RegisterAPIView.as_view(), name='register'),
 #  path('api/auth/login/', LoginAPIView.as_view(), name='token_obtain_pair'),
