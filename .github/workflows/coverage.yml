@@ -11,7 +11,11 @@ jobs:
     runs-on: ubuntu-latest
     env:
       DJANGO_SETTINGS_MODULE: config.settings
-
+    services:
+      redis:
+        image: redis:6-alpine
+        ports:
+          - 6379:6379
     steps:
       # 1) Клонируем репо
       - uses: actions/checkout@v3
