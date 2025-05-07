@@ -245,3 +245,13 @@ CACHES = {
         }
     }
 }
+if 'pytest' in sys.argv or 'test' in sys.argv:
+    # Django во время pytest подменит CACHES на этот локальный
+    CACHES = {
+        'default': {
+            'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
+            'LOCATION': 'unique-snowflake',
+        }
+    }
+    # и можно отключить Cachalot, чтобы он не пытался писать во внешний кеш
+    CACHALOT_ENABLED = False
