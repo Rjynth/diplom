@@ -1,4 +1,5 @@
 from django.core.mail import send_mail
+from django.utils.decorators import method_decorator
 from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -9,7 +10,7 @@ from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 from rest_framework_simplejwt.tokens import RefreshToken
 from social_django.utils import psa
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
-
+from rest_framework_simplejwt.views import TokenObtainPairView as _TokenObtainPairView
 
 class LoginAPIView(TokenObtainPairView):
     """
@@ -73,27 +74,26 @@ class RegisterAPIView(APIView):
         }
         return Response(data, status=status.HTTP_201_CREATED)
 
+@method_decorator(psa('social:complete'), name='dispatch')
 class SocialLoginAPIView(APIView):
     """
     POST /api/auth/social/<backend>/
     Тело: { "access_token": "<токен соцсети>" }
-    Ответ: {"access": "...", "refresh": "..."}
     """
-    permission_classes = []
-    throttle_classes = []
-    @psa('social:complete')
-    def post(self, request, backend):
+    permission_classes = [AllowAny]
+    throttle_classes = []  # отключаем throttle для социального входа
+
+    def post(self, request, backend, *args, **kwargs):
         token = request.data.get('access_token')
         if not token:
             return Response({'error': 'access_token не указан'},
                             status=status.HTTP_400_BAD_REQUEST)
 
-        # request.backend настроит PSA на нужный social backend
         user = request.backend.do_auth(token)
         if not user or not user.is_active:
-            return Response({'error': 'не удалось аутентифицировать'}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({'error': 'не удалось аутентифицировать'},
+                            status=status.HTTP_400_BAD_REQUEST)
 
-        # Генерируем JWT
         refresh = RefreshToken.for_user(user)
         return Response({
             'access':  str(refresh.access_token),
@@ -101,4 +101,7 @@ class SocialLoginAPIView(APIView):
         }, status=status.HTTP_200_OK)
 
 class RefreshAPIView(TokenRefreshView):
+    throttle_classes = []
+class TokenObtainPairView(_TokenObtainPairView):
+    permission_classes = [AllowAny]
     throttle_classes = []
